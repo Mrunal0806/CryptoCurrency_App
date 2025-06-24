@@ -10,29 +10,31 @@ import Loader from './Loader';
 const { Title } = Typography;
 
 const Homepage = () => {
-  const { data, isFetching } = useGetCryptosQuery(10);
-  const globalStats = data?.data?.stats;
+  const { data: coins, isFetching } = useGetCryptosQuery();
 
   if (isFetching) return <Loader />;
+
+  const totalCryptos = coins?.length || 0;
+  const totalMarketCap = coins?.reduce((acc, coin) => acc + (coin.market_cap || 0), 0);
+  const total24hVolume = coins?.reduce((acc, coin) => acc + (coin.total_volume || 0), 0);
+  const totalMarkets = coins?.reduce((acc, coin) => acc + (coin.circulating_supply ? 1 : 0), 0); // rough estimate
 
   return (
     <div>
       <Title level={2} className="heading">Global Crypto Stats</Title>
       <Row gutter={[32, 32]}>
-        <Col span={12}><Statistic title="Total Cryptocurrencies" value={globalStats.total} /></Col>
-        <Col span={12}><Statistic title="Total Exchanges" value={millify(globalStats.totalExchanges)} /></Col>
-        <Col span={12}><Statistic title="Total Market Cap:" value={`$${millify(globalStats.totalMarketCap)}`} /></Col>
-        <Col span={12}><Statistic title="Total 24h Volume" value={`$${millify(globalStats.total24hVolume)}`} /></Col>
-        <Col span={12}><Statistic title="Total Cryptocurrencies" value={globalStats.total} /></Col>
-        <Col span={12}><Statistic title="Total Markets" value={millify(globalStats.totalMarkets)} /></Col>
+        <Col span={12}><Statistic title="Total Cryptocurrencies" value={totalCryptos} /></Col>
+        <Col span={12}><Statistic title="Total Market Cap" value={`$${millify(totalMarketCap)}`} /></Col>
+        <Col span={12}><Statistic title="Total 24h Volume" value={`$${millify(total24hVolume)}`} /></Col>
+        <Col span={12}><Statistic title="Total Markets (Estimate)" value={millify(totalMarkets)} /></Col>
       </Row>
+
       <div className="home-heading-container">
         <Title level={2} className="home-title">Top 50 Cryptos In The World</Title>
         <Title level={3} className="show-more"><Link to="/cryptocurrencies">Show more</Link></Title>
       </div>
+      
       <Cryptocurrencies simplified />
-      <div className="home-heading-container">
-      </div>
     </div>
   );
 };
